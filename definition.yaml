@@ -1,11 +1,26 @@
-asyncapi: '2.6.0'
+asyncapi: 2.6.0
 info:
-    title: VALAWAI C2 Value compatibility calculator
-    version: '0.1.0'
-    description: |
-        This C2 component is ...
-    license:
-        name: MIT
-        url: https://opensource.org/license/mit/
-
+  title: VALAWAI C2 Value Compatibility Calculator
+  version: '0.1.0'
+  license:
+    name: MIT
+    url: https://github.com/VALAWAI/C2_value_compatibility_calculator/blob/main/LICENSE
 defaultContentType: application/json
+channels:
+  compatible:
+    publish:
+      message:
+        payload:
+          type: object
+          additionalProperties: false
+          properties:
+            normative_system:
+              type: object
+              examples:
+                - {'pay': {'rates': [0.1, 0.2, 0.3, 0.4, 0.5]}, 'payback': {'rates': [0.2, 0.2, 0.2, 0.2, 0.2]}}
+            path_length:
+              type: integer
+              default: 10
+            path_sample:
+              type: integer
+              default: 100
