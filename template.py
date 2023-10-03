@@ -1,7 +1,10 @@
-from value_compatibility_calculator import create_app
+import argparse
+from app import create_app
 
 from typing import Any
 
+parser = argparse.ArgumentParser()
+parser.add_argument('port', type=int)
 
 class YourModel:
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -72,13 +75,23 @@ def your_value_semantics_function_2(mdl: YourModel) -> float:
 
 
 if __name__ == '__main__':
+
+    norms = {
+        'n1': {'p11': ...}
+    }
+
     app = create_app(
         YourModel,                      # your model class
         [...],                          # your model initialization arguments
         {...},                          # your model initialization keyword arguments
-        [                               # the set of values whose compatibility is computed
+        norms,                          # your norms dictionary
+        [
             your_value_semantics_function_1,
             your_value_semantics_function_2
-        ]
+        ]                               # your value semantics functions
+        # path_length=10,               # change if needed, default is 10
+        # path_sample=500               # change if needed, default is 500
     )
-    app.run(debug=True)
+
+    args = parser.parse_args()
+    app.run(debug=True, host="0.0.0.0", port=args.port)

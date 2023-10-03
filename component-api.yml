@@ -1,0 +1,79 @@
+asyncapi: 2.6.0
+
+info:
+  title: VALAWAI C2 Value Compatibility Calculator
+  version: '1.0.0'
+  description: |
+    This component computes the compatibility among a set of values under a given normative system.
+  contact:
+    name: IIIA-CSIC
+    url: https://www.iiia.csic.es/en-us/
+  license:
+    name: MIT
+    url: https://github.com/VALAWAI/C2_alignment_calculator/blob/main/LICENSE
+    
+channels:
+  valawai/C2/value_compatibility_calculator/data/compt:
+    publish:
+      summary: Provide the compatibility among the values under the current norms.
+      message:
+        $ref: '#/components/messages/compt'
+  valawai/C2/value_compatibility_calculator/control/norms:
+    subscribe:
+      summary: Transmit the norms that will govern the evolution of the model.
+      message:
+        $ref: '#/components/messages/norms'
+  valawai/C2/value_compatibility_calculator/control/path_length:
+    publish:
+      summary: Provide the path length to compute the alignment.
+      message:
+        $ref: '#/components/messages/path_length'
+  valawai/C2/value_compatibility_calculator/control/path_sample:
+    publish:
+      summary: Provide the sample size of paths to compute the alignment.
+      message:
+        $ref: '#/components/messages/path_sample'
+
+components:
+  messages:
+    compt:
+      summary: Message that contains the computed compatibility.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/compt_payload'
+    norms:
+      summary: Message that contains the norms to compute the alignment.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/norm_payload'
+    path_length:
+      summary: Message that contains the path length to compute the alignment.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/path_length_payload'
+    path_sample:
+      summary: Message that contains the number of path to sample to compute the alignment.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/path_sample_payload'
+
+  schemas:
+    compt_payload:
+      type: number
+      description: The computed compatibility
+      min: -1
+      max: 1
+    norm_payload:
+      type: object
+      description: The norms and normative parameters that regulate the model.
+      example: {'n1': {'p11': 0.2, 'p12': 0.4}, 'n2': {'p21': -0.2, 'p22': 0.8}}
+    path_length_payload:
+      type: integer
+      description: The length of the paths to compute the alignment.
+      min: 1
+      example: 10
+    path_sample_payload:
+      type: integer
+      description: The number of paths to sample when computing the alignment.
+      min: 1
+      example: 500

@@ -1,17 +1,17 @@
+import argparse
 from mesa import Agent, Model
 from mesa.time import BaseScheduler
-from multiprocessing import Process
 from random import seed, uniform
-from value_compatibility_calculator import create_app
+
+from app import create_app
+
+parser = argparse.ArgumentParser()
+parser.add_argument('port', type=int)
 
 seed(100)
 
 class TaxModel(Model):
     def __init__(self) -> None:
-        """An example Agent-Based Model where agents contribute to a common fund
-        with some taxes and get some payback, according to their ranking in
-        wealth.
-        """
         super().__init__()
         self.num_agents = 200
         self.num_segments = 5
@@ -29,14 +29,14 @@ class TaxModel(Model):
         for i in range(self.num_agents):
             a = self.sorted_agents[i]
             seg = self.segments[i]
-            pay = a.wealth * norms['pay']['rates'][seg]
+            pay = a.wealth * norms['pay'][f"r{seg}"]
             if pay > a.wealth:
                 pay = a.wealth
             a.wealth -= pay
             common_fund += pay
         common_fund *= 1.05
         segs_payback = [
-            common_fund * norms['payback']['rates'][seg] / self.ags_per_seg
+            common_fund * norms['payback'][f"r{seg}"] / self.ags_per_seg
             for seg in range(self.num_segments)
         ]
         for i in range(self.num_agents):
@@ -82,30 +82,21 @@ def gini_index_value(mdl: TaxModel) -> float:
 
         
 if __name__ == '__main__':
+
+    normative_system = {
+        'pay': {f'r{i}': 0.1+i/10 for i in range(5)},
+        'payback': {f'r{i}': 0.2 for i in range(5)}
+    }
+
     app = create_app(
         TaxModel,
         [],
         {},
-        [ratio_wealth_value, gini_index_value]
+        normative_system,
+        [ratio_wealth_value, gini_index_value],
+        path_length=5,
+        path_sample=100
     )
-    p1 = Process(target=app.run, kwargs={'debug': True})
-    p1.start()
 
-    import requests
-    url = "http://127.0.0.1:5000"
-
-    data = {
-        'normative_system': {
-            'pay': {'rates': [0.1, 0.2, 0.3, 0.4, 0.5]},
-            'payback': {'rates': [0.2, 0.2, 0.2, 0.2, 0.2]}
-        }
-    }
-
-    def request_and_print():
-        response = requests.get(f"{url}/compatible", json=data)
-        print(response.status_code)
-        print(response.json())
-
-    p2 = Process(target=request_and_print)
-    p2.start()
-    
+    args = parser.parse_args()
+    app.run(debug=True, host="0.0.0.0", port=args.port)
